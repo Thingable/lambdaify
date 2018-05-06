@@ -42,13 +42,36 @@ def virtualify(virtual_directory, python, project='', project_directory=''):
 @main.command()
 def stage():
     """Create a staging directory in the virtual env"""
+    click.echo('Stagifying project.')
     virtual_directory = os.environ['VIRTUAL_ENV']
     project_directory = os.environ['PWD']
     os.chdir(virtual_directory)
-    subprocess.call('rm -r stageify', shell=True)
+    subprocess.call('rm -rf stageify', shell=True)
     os.mkdir('stageify')
     subprocess.call('cp -r {}/lib/python3.6/site-packages/ ./stageify/'.format(virtual_directory), shell=True)
     subprocess.call('cp -r {}/ ./stageify/'.format(project_directory), shell=True)
+    click.echo('Hunting for eggs.')
+    stage_dir_items = os.listdir('./stageify')
+    #os.chdir('./stageify')
+    eggs = [item for item in stage_dir_items if item.endswith('egg-link')]
+    egg_links = []
+    for egg in eggs:
+        print(egg)
+        f = open('./stageify/{}'.format(egg), 'r')
+        egg_links.append(f.readline().rstrip('\n'))
+        f.close()
+    for link in egg_links:
+        egg_info = [item for item in os.listdir('{}'.format(link)) if item.endswith('egg-info')]
+        f = open('{}/{}/top_level.txt'.format(link, egg_info[0]), 'r')
+        top_level_files = f.readlines()
+        f.close()
+        for file in top_level_files:
+            file = file.rstrip('\n')
+            print('cp -r {}/{} ./stageify/'.format(link, file))
+            subprocess.call('cp -r {}/{} ./stageify/'.format(link, file), shell=True)
+
+
+
 
 @main.command()
 @click.option('--lambda_handler', '-h', default='app.lambda_handler', help='The handler to be called (Default: app.lambda_handler)')

@@ -14,5 +14,5 @@ Simply run:
 
 To use it:
 
-    $ lambdaify-my-py
+    $ lambdaify --help
     
