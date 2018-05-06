@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Lambdaify My Py(thon)
 
 A simple tool for building clean python projects for aws lambda.

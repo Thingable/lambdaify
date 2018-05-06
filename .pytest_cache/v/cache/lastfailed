@@ -1,4 +1,0 @@
-{
-  "tests/test_cli.py::test_startify": true, 
-  "tests/test_cli.py::test_virtualify": true
-}
