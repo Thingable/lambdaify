@@ -1,4 +1,4 @@
-# Lambdaify My Py(thon)
+# Lambdaify (My Python)
 
 A simple tool for building clean python projects for aws lambda.
 

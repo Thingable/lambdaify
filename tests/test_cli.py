@@ -2,7 +2,7 @@ import pytest
 import os
 import subprocess
 from click.testing import CliRunner
-from lambdaify_my_py import cli
+from lambdaify import cli
 
 
 @pytest.fixture

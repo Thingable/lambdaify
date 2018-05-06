@@ -6,9 +6,9 @@ from setuptools import find_packages, setup
 dependencies = ['click']
 
 setup(
-    name='lambdaify-my-py',
+    name='lambdaify',
     version='0.1.0',
-    url='https://github.com/Thingable/lambdaify-my-py',
+    url='https://github.com/Thingable/lambdaify',
     license='MIT',
     author='Darrell Henderson',
     author_email='darrell@thingable.co',
@@ -21,7 +21,7 @@ setup(
     install_requires=dependencies,
     entry_points={
         'console_scripts': [
-            'lambdaify-my-py = lambdaify_my_py.cli:main',
+            'lambdaify = lambdaify.cli:main',
         ],
     },
     classifiers=[
