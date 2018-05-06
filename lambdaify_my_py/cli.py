@@ -13,7 +13,7 @@ def main():
 @click.option('--virtual_directory', '-v', default='./', help="Directory to create virtual environment")
 @click.option('--python', default='/usr/local/bin/python3', help="Path to python executable for virtualenv (Default: /usr/local/bin/python3')")
 @click.pass_context
-def startify(ctx, project, project_directory, python, virtual_directory):
+def start(ctx, project, project_directory, python, virtual_directory):
     """Create a project and a virtual environment"""
     abspath = os.path.abspath(__file__)
     dname = os.path.dirname(os.path.dirname(abspath))
@@ -32,7 +32,7 @@ def startify(ctx, project, project_directory, python, virtual_directory):
 
 @main.command()
 @click.option('--virtual_directory', '-v', default='./', help="Directory to create virtual environment")
-@click.option('--python', default='/usr/local/bin/python3', help="Path to python executable for virtualenv (Default: /usr/local/bin/python3')")
+@click.option('--python', default='/usr/local/bin/python3', help="Path to python executable for virtualenv (Default: /usr/local/bin/python3)")
 def virtualify(virtual_directory, python, project='', project_directory=''):
     """Create a virtualenv for a current project"""
     os.mkdir('{}{}_venv'.format(virtual_directory, project))
@@ -40,7 +40,7 @@ def virtualify(virtual_directory, python, project='', project_directory=''):
     click.echo("Run 'source {}{}_venv/bin/activate' to use {}'s virtualenv".format(virtual_directory, project, project))
 
 @main.command()
-def stageify():
+def stage():
     """Create a staging directory in the virtual env"""
     virtual_directory = os.environ['VIRTUAL_ENV']
     project_directory = os.environ['PWD']
@@ -51,12 +51,17 @@ def stageify():
     subprocess.call('cp -r {}/ ./stageify/'.format(project_directory), shell=True)
 
 @main.command()
-def lambdaify():
+@click.option('--lambda_handler', '-h', default='app.lambda_handler', help='The handler to be called (Default: app.lambda_handler)')
+def test(lambda_handler):
     """Test your project in a lambda docker clone"""
-    subprocess.call('docker run --rm -v "$VIRTUAL_ENV/stageify":/var/task lambci/lambda:python3.6 app.lambda_handler', shell=True)
+    subprocess.call('docker run --rm -v "$VIRTUAL_ENV/stageify":/var/task lambci/lambda:python3.6 {}'.format(lambda_handler), shell=True)
 
 @main.command()
-def zipify():
+def zip():
     """Create a zip file to upload to lambda"""
-    subprocess.call('zip -r lambdaify.zip $VIRTUAL_ENV/stageify', shell=True)
+    venv = os.environ['VIRTUAL_ENV']
+    current_directory = os.getcwd()
+    os.chdir('{}/stageify/'.format(venv))
+    subprocess.call('zip -r {}/lambdaify.zip .'.format(current_directory), shell=True)
+
 
