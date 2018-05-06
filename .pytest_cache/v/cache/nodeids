@@ -1,0 +1,6 @@
+[
+  "tests/test_cli.py::test_startify",
+  "tests/test_cli.py::test_virtualify",
+  "tests/test_cli.py::test_lambdaify",
+  "tests/test_cli.py::test_zipify"
+]
