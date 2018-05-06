@@ -8,7 +8,7 @@ def main():
     pass
 
 @main.command()
-@click.option('--project', '-p', default="Lambdaify", help="Name of the project. (Default: 'Lambdaify')")
+@click.option('--project', '-p', default="lambdaify-project", help="Name of the project. (Default: 'Lambdaify')")
 @click.option('--project_directory', '-d', default='./', help="Directory to create project")
 @click.option('--virtual_directory', '-v', default='./', help="Directory to create virtual environment")
 @click.option('--python', default='/usr/local/bin/python3', help="Path to python executable for virtualenv (Default: /usr/local/bin/python3')")
