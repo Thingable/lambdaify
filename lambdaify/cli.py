@@ -75,9 +75,10 @@ def stage():
 
 @main.command()
 @click.option('--lambda_handler', '-h', default='app.lambda_handler', help='The handler to be called (Default: app.lambda_handler)')
-def test(lambda_handler):
+@click.option('--detail', '-d', help='A JSON string to be sent to the event parameter')
+def test(lambda_handler, detail):
     """Test your project in a lambda docker clone"""
-    subprocess.call('docker run --rm -v "$VIRTUAL_ENV/stageify":/var/task lambci/lambda:python3.6 {}'.format(lambda_handler), shell=True)
+    subprocess.call('docker run --rm -v "$VIRTUAL_ENV/stageify":/var/task lambci/lambda:python3.6 {} \'{}\''.format(lambda_handler, detail), shell=True)
 
 @main.command()
 def zip():
