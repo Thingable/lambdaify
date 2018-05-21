@@ -10,7 +10,7 @@ def main():
 @main.command()
 @click.option('--project', '-p', default="lambdaify-project", help="Name of the project. (Default: 'Lambdaify')")
 @click.option('--project_directory', '-d', default='./', help="Directory to create project")
-@click.option('--virtual_directory', '-v', default='./', help="Directory to create virtual environment")
+@click.option('--virtual_directory', '-v', help="Directory to create virtual environment (Default: Project dir")
 @click.option('--python', default='/usr/local/bin/python3', help="Path to python executable for virtualenv (Default: /usr/local/bin/python3')")
 @click.pass_context
 def start(ctx, project, project_directory, python, virtual_directory):
@@ -20,24 +20,27 @@ def start(ctx, project, project_directory, python, virtual_directory):
     try:
         os.mkdir(project)
         subprocess.call('cp -r {}/project-template/ {}/{}'.format(dname, project_directory, project), shell=True)
-        ctx.forward(virtualify)
+
+        if not virtual_directory:
+            virtual_directory = './{}'.format(project)
+        ctx.invoke(virtualify, virtual_directory=virtual_directory, project=project)
+
+        os.chdir('./{}'.format(project))
+        print(os.getcwd())
+        os.putenv('LAMBDAIFY_PROJECT', project)
+        os.putenv('LAMBDAIFY_PROJECT_DIR', os.getcwd())
+
         click.echo("Created the project '{}' and its {} environment. Standing by to Lambdaify.".format(project, python))
     except Exception as err:
         click.echo('Failed to startify {}: {}'.format(project, err))
 
-    os.chdir('./{}'.format(project))
-    print(os.getcwd())
-    os.putenv('LLAMBDAIFY_PROJECT', project)
-    os.putenv('LAMBDAIFY_PROJECT_DIR', os.getcwd())
 
 @main.command()
 @click.option('--virtual_directory', '-v', default='./', help="Directory to create virtual environment")
 @click.option('--python', default='/usr/local/bin/python3', help="Path to python executable for virtualenv (Default: /usr/local/bin/python3)")
-def virtualify(virtual_directory, python, project='', project_directory=''):
+def virtualify(virtual_directory, python, project=''):
     """Create a virtualenv for a current project"""
-    os.mkdir('{}{}venv'.format(virtual_directory, project))
-    shell = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    shell.call('virtualenv --python={} {}{}venv'.format(python, virtual_directory, project), shell=True)
+    subprocess.call('virtualenv --python={} {}/.{}_venv'.format(python, virtual_directory, project), shell=True)
     click.echo("Run 'source {}{}venv/bin/activate' to use {}'s virtualenv".format(virtual_directory, project, project))
 
 @main.command()
