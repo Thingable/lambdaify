@@ -35,9 +35,10 @@ def start(ctx, project, project_directory, python, virtual_directory):
 @click.option('--python', default='/usr/local/bin/python3', help="Path to python executable for virtualenv (Default: /usr/local/bin/python3)")
 def virtualify(virtual_directory, python, project='', project_directory=''):
     """Create a virtualenv for a current project"""
-    os.mkdir('{}{}_venv'.format(virtual_directory, project))
-    subprocess.call('virtualenv --python={} {}{}_venv'.format(python, virtual_directory, project), shell=True)
-    click.echo("Run 'source {}{}_venv/bin/activate' to use {}'s virtualenv".format(virtual_directory, project, project))
+    os.mkdir('{}{}venv'.format(virtual_directory, project))
+    shell = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    shell.call('virtualenv --python={} {}{}venv'.format(python, virtual_directory, project), shell=True)
+    click.echo("Run 'source {}{}venv/bin/activate' to use {}'s virtualenv".format(virtual_directory, project, project))
 
 @main.command()
 def stage():
@@ -45,18 +46,19 @@ def stage():
     click.echo('Stagifying project.')
     virtual_directory = os.environ['VIRTUAL_ENV']
     project_directory = os.environ['PWD']
+
+    click.echo('\tShipping the packages')
     os.chdir(virtual_directory)
     subprocess.call('rm -rf stageify', shell=True)
     os.mkdir('stageify')
     subprocess.call('cp -r {}/lib/python3.6/site-packages/ ./stageify/'.format(virtual_directory), shell=True)
-    subprocess.call('cp -r {}/ ./stageify/'.format(project_directory), shell=True)
-    click.echo('Hunting for eggs.')
+
+    click.echo('\tHunting for eggs.')
     stage_dir_items = os.listdir('./stageify')
-    #os.chdir('./stageify')
     eggs = [item for item in stage_dir_items if item.endswith('egg-link')]
     egg_links = []
     for egg in eggs:
-        print(egg)
+        click.echo('\t\t{}'.format(egg))
         f = open('./stageify/{}'.format(egg), 'r')
         egg_links.append(f.readline().rstrip('\n'))
         f.close()
@@ -67,11 +69,14 @@ def stage():
         f.close()
         for file in top_level_files:
             file = file.rstrip('\n')
-            print('cp -r {}/{} ./stageify/'.format(link, file))
             subprocess.call('cp -r {}/{} ./stageify/'.format(link, file), shell=True)
+            click.echo('\t\t- Copied {}/{} to staging area'.format(link, file))
 
+    click.echo('\tArming your lasers.')
+    os.chdir(project_directory)
+    subprocess.call('find . -name {} -prune -o -print0 | cpio -pmd0 {}/stageify/'.format(os.path.basename(virtual_directory), virtual_directory), shell=True)
 
-
+    click.echo('Staging complete.')
 
 @main.command()
 @click.option('--lambda_handler', '-h', default='app.lambda_handler', help='The handler to be called (Default: app.lambda_handler)')
